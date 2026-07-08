@@ -1,0 +1,87 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Send Money - Bansking System{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css"/>
+{% endblock %}
+
+{% block content %}
+<div class="wrapper-flex animate__animated animate__fadeInUp">
+    <div class="wide-send-card animate__animated animate__zoomIn" style="animation-duration:.5s;">
+
+        <a href="{% url 'dashboard' %}" class="btn-exit" title="Go to Dashboard">
+            <i class="bi bi-x-lg fs-5"></i>
+        </a>
+
+        <div class="card-left">
+            <div class="icon-circle-lg"><i class="bi bi-send-fill"></i></div>
+            <h4>Secure Transfer</h4>
+            <p class="text-muted small" style="margin-top:-5px;">Instant &amp; Hassle-free</p>
+            <div class="feature-list">
+                <div class="feature-item"><i class="bi bi-shield-check"></i><span>Bank-level security</span></div>
+                <div class="feature-item"><i class="bi bi-lightning-charge"></i><span>Instant processing</span></div>
+                <div class="feature-item"><i class="bi bi-currency-exchange"></i><span>Real-time conversion</span></div>
+                <div class="feature-item"><i class="bi bi-receipt"></i><span>Auto receipt generation</span></div>
+            </div>
+        </div>
+
+        <div class="card-right">
+            <h5>Send Money</h5>
+            <div class="subtitle"><i class="bi bi-person-badge me-1"></i> Enter recipient details</div>
+
+            {% if error %}
+            <div class="error-msg"><i class="bi bi-exclamation-triangle-fill fs-6"></i><span>{{ error }}</span></div>
+            {% endif %}
+
+            <form method="post" id="sendMoneyForm">
+                {% csrf_token %}
+                <div class="row"><div class="col-12">{{ form|crispy }}</div></div>
+                <button type="submit" class="btn-submit-wide" id="submitBtn">
+                    <i class="bi bi-send-check-fill"></i> Confirm &amp; Send Money <i class="bi bi-arrow-right-short fs-5"></i>
+                </button>
+            </form>
+
+            <div class="amount-preview" id="amountPreview">
+                <small class="text-muted d-block mb-1">You're about to send</small>
+                <strong id="previewAmount" style="font-size:1.2rem;color:#667eea;">£0.00</strong>
+                <div class="progress mt-2" style="height:4px;">
+                    <div class="progress-bar" style="background:linear-gradient(90deg,#667eea,#764ba2);width:0%;"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function() {
+    var amountInput = document.querySelector('input[name="amount"]');
+    var previewBox  = document.getElementById('amountPreview');
+    var previewSpan = document.getElementById('previewAmount');
+    var currSel     = document.querySelector('select[name="currency"]');
+
+    if (amountInput) {
+        amountInput.addEventListener('input', function() {
+            var val = this.value;
+            if (val && !isNaN(val) && parseFloat(val) > 0) {
+                previewSpan.innerHTML = parseFloat(val).toFixed(2) + ' ' + (currSel ? currSel.value : 'USD');
+                previewBox.classList.add('active');
+            } else {
+                previewBox.classList.remove('active');
+            }
+        });
+    }
+
+    var form = document.getElementById('sendMoneyForm');
+    var btn  = document.getElementById('submitBtn');
+    if (form) {
+        form.addEventListener('submit', function() {
+            if (btn) { btn.disabled = true; btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i> Processing...'; }
+        });
+    }
+})();
+</script>
+{% endblock %}

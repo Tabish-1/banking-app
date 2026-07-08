@@ -1,0 +1,211 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Notifications - Bansking System{% endblock %}
+
+{% block content %}
+<!-- Toast container -->
+<div class="toast-wrap" id="toastArea"></div>
+
+<div class="container py-4">
+
+    <div class="page-header mb-4">
+        <div class="d-flex align-items-start justify-content-between flex-wrap gap-3">
+            <div>
+                <div class="page-title">
+                    <span class="bell-icon"><i class="bi bi-bell-fill"></i></span>
+                    Notifications
+                    <span class="unread-badge" id="unreadBadge" {% if unread_count == 0 %}style="display:none"{% endif %}>
+                        <i class="bi bi-envelope-fill"></i>
+                        <span id="unreadNum">{{ unread_count }}</span> unread
+                    </span>
+                </div>
+                <p class="section-sub">
+                    <i class="bi bi-info-circle me-1"></i>
+                    Stay updated with your latest activities
+                </p>
+            </div>
+
+            {% if notifications %}
+            <div id="markAllWrap" {% if unread_count == 0 %}style="display:none"{% endif %}>
+                <button type="button" class="btn-mark-all" id="markAllBtn">
+                    <i class="bi bi-check2-all"></i> Mark all as read
+                </button>
+            </div>
+            {% endif %}
+        </div>
+        <hr class="custom-divider">
+    </div>
+
+    <div class="notif-card">
+        {% if notifications %}
+        <div id="notifList">
+            {% for n in notifications %}
+            <div class="notif-item {% if not n.is_read %}notif-unread{% else %}notif-read{% endif %}" id="notif-{{ n.pk }}">
+
+                <div class="notif-icon
+                    {% if 'payment' in n.message|lower or 'transfer' in n.message|lower %}icon-payment
+                    {% elif 'accept' in n.message|lower or 'success' in n.message|lower %}icon-success
+                    {% elif 'reject' in n.message|lower or 'fail' in n.message|lower %}icon-danger
+                    {% elif 'request' in n.message|lower or 'pending' in n.message|lower %}icon-warning
+                    {% else %}icon-bell{% endif %}">
+                    {% if 'payment' in n.message|lower or 'transfer' in n.message|lower %}
+                        <i class="bi bi-cash-stack"></i>
+                    {% elif 'accept' in n.message|lower or 'success' in n.message|lower %}
+                        <i class="bi bi-check-circle-fill"></i>
+                    {% elif 'reject' in n.message|lower or 'fail' in n.message|lower %}
+                        <i class="bi bi-x-circle-fill"></i>
+                    {% elif 'request' in n.message|lower or 'pending' in n.message|lower %}
+                        <i class="bi bi-clock-history"></i>
+                    {% elif 'welcome' in n.message|lower or 'register' in n.message|lower %}
+                        <i class="bi bi-emoji-smile-fill"></i>
+                    {% else %}
+                        <i class="bi bi-bell-fill"></i>
+                    {% endif %}
+                </div>
+
+                <div class="flex-grow-1" style="min-width:0;">
+                    <div class="notif-msg">{{ n.message|safe }}</div>
+                    <div class="notif-meta">
+                        <span class="time-pill">
+                            <i class="bi bi-clock"></i>
+                            {{ n.timestamp|date:"d M Y, H:i" }}
+                        </span>
+                        {% if not n.is_read %}
+                        <span class="new-pill" id="newbadge-{{ n.pk }}">
+                            <i class="bi bi-envelope-fill"></i> New
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                {% if not n.is_read %}
+                <button type="button" class="mark-read-btn" data-id="{{ n.pk }}" title="Mark as read">
+                    <i class="bi bi-check-circle me-1"></i>Mark read
+                </button>
+                {% endif %}
+
+            </div>
+            {% endfor %}
+        </div>
+
+        {% else %}
+        <div class="empty-state" style="padding:56px 20px;">
+            <div class="empty-icon">
+                <i class="bi bi-bell-slash" style="background:linear-gradient(135deg,#fbbf24,#f59e0b);-webkit-background-clip:text;background-clip:text;color:transparent;"></i>
+            </div>
+            <h6>No notifications yet</h6>
+            <p>When you receive payments or requests,<br>they'll appear right here.</p>
+            <p class="mt-3" style="font-size:.78rem;color:#d1d5db;">
+                <i class="bi bi-arrow-repeat me-1"></i>Check back later for updates
+            </p>
+        </div>
+        {% endif %}
+    </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+$(function () {
+
+    function showToast(msg, type) {
+        type = type || 'success';
+        var icon = type === 'success' ? 'bi-check-circle-fill'
+                 : type === 'error'   ? 'bi-exclamation-triangle-fill'
+                 :                      'bi-info-circle-fill';
+        var el = $('<div>').addClass('toast-item toast-' + type)
+            .html('<i class="bi ' + icon + '"></i><span>' + msg + '</span>');
+        $('#toastArea').append(el);
+        setTimeout(function () { el.fadeOut(300, function () { el.remove(); }); }, 3000);
+    }
+
+    function syncUnreadUI() {
+        var count = $('.notif-unread').length;
+        if (count > 0) {
+            $('#unreadNum').text(count);
+            $('#unreadBadge').show();
+            $('#markAllWrap').show();
+        } else {
+            $('#unreadBadge').hide();
+            $('#markAllWrap').hide();
+        }
+    }
+
+    function applyRead($item, id) {
+        $item.removeClass('notif-unread').addClass('notif-read');
+        $('#newbadge-' + id).remove();
+        $item.find('.mark-read-btn').remove();
+    }
+
+    $(document).on('click', '.mark-read-btn', function () {
+        var $btn  = $(this);
+        var id    = $btn.data('id');
+        var $item = $('#notif-' + id);
+        var csrf  = $('input[name="csrfmiddlewaretoken"]').first().val() || getCookie('csrftoken');
+
+        $btn.prop('disabled', true).html('<i class="bi bi-hourglass-split me-1"></i>...');
+
+        $.ajax({
+            url: '/payapp/mark-notification-read/' + id + '/',
+            type: 'POST',
+            headers: { 'X-CSRFToken': csrf },
+            success: function (res) {
+                if (res.status === 'success') {
+                    applyRead($item, id);
+                    syncUnreadUI();
+                    showToast(res.message || 'Marked as read', 'success');
+                } else {
+                    showToast(res.message || 'Something went wrong', 'error');
+                    $btn.prop('disabled', false).html('<i class="bi bi-check-circle me-1"></i>Mark read');
+                }
+            },
+            error: function (xhr) {
+                showToast((xhr.responseJSON && xhr.responseJSON.message) || 'Error marking as read', 'error');
+                $btn.prop('disabled', false).html('<i class="bi bi-check-circle me-1"></i>Mark read');
+            }
+        });
+    });
+
+    $('#markAllBtn').on('click', function () {
+        var $btn   = $(this);
+        var unread = $('.notif-unread').length;
+        var csrf   = $('input[name="csrfmiddlewaretoken"]').first().val() || getCookie('csrftoken');
+
+        if (unread === 0) { showToast('No unread notifications', 'info'); return; }
+
+        $btn.prop('disabled', true).html('<i class="bi bi-hourglass-split me-1"></i>Processing...');
+
+        $.ajax({
+            url: "{% url 'mark_all_notifications_read' %}",
+            type: 'POST',
+            headers: { 'X-CSRFToken': csrf },
+            success: function (res) {
+                if (res.status === 'success') {
+                    $('.notif-unread').each(function () {
+                        applyRead($(this), $(this).attr('id').replace('notif-', ''));
+                    });
+                    syncUnreadUI();
+                    showToast(res.message || 'All notifications marked as read', 'success');
+                } else {
+                    showToast(res.message || 'Something went wrong', 'error');
+                    $btn.prop('disabled', false).html('<i class="bi bi-check2-all me-1"></i>Mark all as read');
+                }
+            },
+            error: function (xhr) {
+                showToast((xhr.responseJSON && xhr.responseJSON.message) || 'Error updating notifications', 'error');
+                $btn.prop('disabled', false).html('<i class="bi bi-check2-all me-1"></i>Mark all as read');
+            }
+        });
+    });
+
+    function getCookie(name) {
+        var v = document.cookie.match('(^|;) ?' + name + '=([^;]*)(;|$)');
+        return v ? v[2] : '';
+    }
+
+    syncUnreadUI();
+});
+</script>
+{% endblock %}

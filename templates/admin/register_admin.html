@@ -1,0 +1,114 @@
+{% extends 'base.html' %}
+{% load crispy_forms_tags %}
+
+{% block title %}Register Admin - Banking System{% endblock %}
+
+{% block content %}
+<div class="register-admin-page">
+
+  <div class="mb-4">
+    <h4 class="mb-1"><i class="bi bi-person-plus-fill me-2"></i>Register New Admin</h4>
+    <p class="text-muted small mb-0">Create a new administrator account</p>
+  </div>
+
+  <div class="row g-4 align-items-start">
+
+    <!-- Form -->
+    <div class="col-12 col-lg-6">
+      <div class="card p-4">
+        <form method="post">
+          {% csrf_token %}
+          {{ form|crispy }}
+          <button type="submit" class="btn btn-danger w-100 mt-2">
+            <i class="bi bi-person-plus me-2"></i>Create Admin Account
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Info Panel -->
+    <div class="col-12 col-lg-6">
+      <div class="card p-4 info-panel">
+        <div class="info-icon-wrap mb-3">
+          <div class="info-icon bg-danger-subtle rounded-circle">
+            <i class="bi bi-shield-fill-check fs-3 text-danger"></i>
+          </div>
+        </div>
+        <h5 class="fw-bold mb-2">Admin Privileges</h5>
+        <p class="text-muted small mb-4">Admins have full access to manage the Banking System.</p>
+        <ul class="info-list list-unstyled">
+          <li><i class="bi bi-check-circle-fill text-success me-2"></i>View all users</li>
+          <li><i class="bi bi-check-circle-fill text-success me-2"></i>View all transactions</li>
+          <li><i class="bi bi-check-circle-fill text-success me-2"></i>Register new admins</li>
+          <li><i class="bi bi-check-circle-fill text-success me-2"></i>Access admin dashboard</li>
+        </ul>
+        <div class="alert alert-warning d-flex align-items-start gap-2 mt-3 mb-0 p-3" style="font-size:0.82rem;">
+          <i class="bi bi-exclamation-triangle-fill mt-1"></i>
+          <span>Only create admin accounts for trusted personnel.</span>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<style>
+.info-icon { width:64px; height:64px; display:flex; align-items:center; justify-content:center; }
+.info-list li { padding: 6px 0; font-size: 0.9rem; border-bottom: 1px solid #f0f0f0; }
+.info-list li:last-child { border-bottom: none; }
+.info-panel { background: linear-gradient(135deg, #fff 0%, #fafafa 100%); }
+
+/* Password toggle styling */
+.password-wrapper { position: relative; }
+.password-wrapper input { padding-right: 42px !important; }
+.toggle-pw {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  padding: 0;
+  color: #888;
+  cursor: pointer;
+  font-size: 1rem;
+  line-height: 1;
+  z-index: 5;
+}
+.toggle-pw:hover { color: #333; }
+</style>
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  // Find all password inputs and wrap them
+  document.querySelectorAll('input[type="password"]').forEach(function (input) {
+    // Wrap in relative div
+    var wrapper = document.createElement('div');
+    wrapper.className = 'password-wrapper';
+    input.parentNode.insertBefore(wrapper, input);
+    wrapper.appendChild(input);
+
+    // Create toggle button
+    var btn = document.createElement('button');
+    btn.type = 'button';
+    btn.className = 'toggle-pw';
+    btn.innerHTML = '<i class="bi bi-eye"></i>';
+    btn.title = 'Show/hide password';
+    wrapper.appendChild(btn);
+
+    btn.addEventListener('click', function () {
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.innerHTML = '<i class="bi bi-eye-slash"></i>';
+      } else {
+        input.type = 'password';
+        btn.innerHTML = '<i class="bi bi-eye"></i>';
+      }
+    });
+  });
+});
+</script>
+{% endblock %}
+
+{% endblock %}

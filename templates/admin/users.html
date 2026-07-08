@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+
+{% block title %}All Users - Banking System{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <h4 class="mb-1"><i class="bi bi-people me-2"></i>All Users</h4>
+  <p class="text-muted small mb-0">{{ users|length }} user(s) registered</p>
+</div>
+
+<div class="card p-3">
+  {% if users %}
+  <!-- Desktop -->
+  <div class="d-none d-md-block table-responsive">
+    <table class="table table-hover table-sm align-middle">
+      <thead class="table-light">
+        <tr><th>Username</th><th>Full Name</th><th>Email</th><th>Currency</th><th>Balance</th><th>Role</th></tr>
+      </thead>
+      <tbody>
+        {% for u in users %}
+        <tr>
+          <td><span class="fw-semibold">{{ u.user.username }}</span></td>
+          <td>{{ u.user.get_full_name|default:"-" }}</td>
+          <td class="text-muted small">{{ u.user.email }}</td>
+          <td><span class="badge bg-secondary">{{ u.currency }}</span></td>
+          <td class="fw-semibold">{{ u.balance }}</td>
+          <td>
+            {% if u.is_admin %}<span class="badge bg-danger">Admin</span>
+            {% else %}<span class="badge bg-primary">User</span>{% endif %}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  <!-- Mobile -->
+  <div class="d-md-none">
+    {% for u in users %}
+    <div class="user-card card mb-2 p-3">
+      <div class="d-flex justify-content-between align-items-start">
+        <div>
+          <div class="fw-semibold">{{ u.user.username }}</div>
+          <div class="text-muted small">{{ u.user.get_full_name|default:"-" }}</div>
+          <div class="text-muted small">{{ u.user.email }}</div>
+        </div>
+        <div class="text-end">
+          {% if u.is_admin %}<span class="badge bg-danger d-block mb-1">Admin</span>
+          {% else %}<span class="badge bg-primary d-block mb-1">User</span>{% endif %}
+          <span class="badge bg-secondary">{{ u.currency }}</span>
+          <div class="fw-bold mt-1 small">{{ u.balance }}</div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-muted small text-center py-4">No users found.</p>
+  {% endif %}
+</div>
+
+<style>
+.user-card { border-left: 3px solid #0d6efd; }
+</style>
+{% endblock %}

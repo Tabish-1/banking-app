@@ -1,0 +1,112 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Dashboard - Bansking System{% endblock %}
+
+{% block content %}
+<div class="container py-4 animate__animated animate__fadeIn">
+    <header class="mb-4 d-flex align-items-center">
+        <div class="me-3"><i class="bi bi-cpu-fill fs-3 text-primary"></i></div>
+        <div>
+            <h4 class="fw-bold mb-0 text-dark">Welcome, {{ user.first_name }}!</h4>
+            <p class="text-muted small mb-0">Quick summary of your account.</p>
+        </div>
+    </header>
+
+    <div class="row g-4">
+        <div class="col-lg-4">
+            <div class="dashboard-card balance-card p-4 h-100 shadow-lg">
+                <div class="d-flex justify-content-between mb-4">
+                    <span class="opacity-75">Available Balance</span>
+                    <i class="bi bi-fingerprint fs-4"></i>
+                </div>
+                <h1 class="fw-bold mb-2">{{ profile.currency }} {{ profile.balance }}</h1>
+                <div class="mt-auto pt-3 small">
+                    <div class="opacity-75">Account Holder</div>
+                    <div class="fw-bold">{{ user.get_full_name }}</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div class="row h-100 g-3">
+                <div class="col-6 col-md-3">
+                    <a href="/webapps2026/send/" class="action-btn btn-send">
+                        <div class="dashboard-card action-card">
+                            <div class="icon-wrapper"><i class="bi bi-send"></i></div>
+                            <span class="action-label text-dark small fw-semibold">Send</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-6 col-md-3">
+                    <a href="/webapps2026/request/" class="action-btn btn-request">
+                        <div class="dashboard-card action-card">
+                            <div class="icon-wrapper text-success"><i class="bi bi-box-arrow-in-down"></i></div>
+                            <span class="action-label text-dark small fw-semibold">Request</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-6 col-md-3">
+                    <a href="/webapps2026/transactions/" class="action-btn btn-history">
+                        <div class="dashboard-card action-card">
+                            <div class="icon-wrapper text-warning"><i class="bi bi-journal-text"></i></div>
+                            <span class="action-label text-dark small fw-semibold">History</span>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-6 col-md-3">
+                    <a href="/webapps2026/notifications/" class="action-btn btn-alerts position-relative">
+                        <div class="dashboard-card action-card">
+                            <div class="icon-wrapper text-danger"><i class="bi bi-bell"></i></div>
+                            <span class="action-label text-dark small fw-semibold">Alerts</span>
+                            {% if unread_notifications %}
+                            <span class="badge rounded-pill bg-danger position-absolute badge-notif">
+                                {{ unread_notifications }}
+                            </span>
+                            {% endif %}
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="mt-5">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h5 class="fw-bold mb-0">Recent Activity</h5>
+            <a href="/webapps2026/transactions/" class="text-decoration-none small fw-bold">View All</a>
+        </div>
+        <div class="dashboard-card table-card">
+            <div class="table-responsive">
+                <table class="table table-hover mb-0">
+                    <thead>
+                        <tr>
+                            <th>Recipient / Sender</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                            <th class="text-end">Timestamp</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if recent_transactions %}
+                            {% for t in recent_transactions %}
+                            <tr>
+                                <td>
+                                    <div class="fw-bold text-dark">{{ t.receiver.get_full_name }}</div>
+                                    <div class="text-muted small">ID: #{{ t.id|default:"2026" }}</div>
+                                </td>
+                                <td><span class="fw-bold">{{ t.amount }} {{ t.sender_currency }}</span></td>
+                                <td><span class="status-pill status-success">Completed</span></td>
+                                <td class="text-end text-muted small">{{ t.timestamp|date:"M d, Y" }}</td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            <tr><td colspan="4" class="text-center py-5 text-muted">No activity found.</td></tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,495 @@
+{% extends 'base.html' %}
+
+{% block title %}Create Account — Bansking System{% endblock %}
+
+{% block extra_css %}
+<style>
+/* ── REGISTER PAGE — matches site theme exactly ── */
+.bs-reg-root {
+    min-height: calc(100vh - 64px);
+    display: flex;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+}
+
+/* LEFT: brand panel */
+.bs-reg-left {
+    width: 38%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 3rem 2.75rem;
+    overflow: hidden;
+    flex-shrink: 0;
+}
+.bs-reg-left::before {
+    content: '';
+    position: absolute; inset: 0;
+    background-image:
+        linear-gradient(rgba(255,255,255,.07) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.07) 1px, transparent 1px);
+    background-size: 52px 52px;
+    pointer-events: none;
+}
+.bs-reg-left::after {
+    content: '';
+    position: absolute;
+    width: 380px; height: 380px;
+    background: radial-gradient(circle, rgba(255,255,255,.15) 0%, transparent 65%);
+    bottom: -110px; right: -110px;
+    border-radius: 50%;
+    pointer-events: none;
+}
+.bs-rl-top { position: relative; z-index: 1; }
+.bs-rl-bot { position: relative; z-index: 1; }
+
+.bs-logo {
+    display: flex; align-items: center; gap: .85rem;
+    margin-bottom: 3rem;
+}
+.bs-logo-mark {
+    width: 44px; height: 44px;
+    background: rgba(255,255,255,.25);
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 1.3rem; color: #fff;
+}
+.bs-logo-name {
+    font-size: 1.35rem; font-weight: 800;
+    color: #fff; letter-spacing: -.3px;
+}
+
+.bs-reg-headline {
+    font-size: clamp(1.75rem, 2.6vw, 2.6rem);
+    font-weight: 800; line-height: 1.18;
+    color: #fff; margin-bottom: 1rem; letter-spacing: -.4px;
+}
+.bs-reg-headline em { font-style: italic; font-weight: 300; opacity: .9; }
+
+.bs-reg-sub {
+    color: rgba(255,255,255,.7);
+    font-size: .875rem; line-height: 1.7;
+    margin-bottom: 2rem;
+}
+
+/* Steps */
+.bs-steps { display: flex; flex-direction: column; gap: 1rem; }
+.bs-step { display: flex; align-items: flex-start; gap: .9rem; }
+.bs-step-num {
+    width: 28px; height: 28px; flex-shrink: 0;
+    background: rgba(255,255,255,.2);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: .68rem; font-weight: 800; color: #fff;
+}
+.bs-step-strong {
+    display: block; font-size: .82rem; font-weight: 700;
+    color: rgba(255,255,255,.88); margin-bottom: .1rem;
+}
+.bs-step-sub {
+    font-size: .74rem; color: rgba(255,255,255,.5); line-height: 1.5;
+}
+
+/* Badges */
+.bs-badges { display: flex; flex-direction: column; gap: .65rem; }
+.bs-badge {
+    display: flex; align-items: center; gap: .7rem;
+    color: rgba(255,255,255,.72); font-size: .78rem; font-weight: 500;
+}
+.bs-badge i { color: rgba(255,255,255,.9); font-size: .85rem; width: 16px; text-align: center; }
+
+/* RIGHT */
+.bs-reg-right {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 2.5rem 2rem;
+    overflow-y: auto;
+}
+
+.bs-reg-box {
+    width: 100%; max-width: 540px;
+    background: #fff;
+    border-radius: 20px;
+    padding: 2.5rem 2.25rem;
+    box-shadow: 0 20px 60px rgba(102,126,234,.18), 0 4px 16px rgba(0,0,0,.06);
+    animation: formReveal .5s cubic-bezier(.16,1,.3,1) both;
+}
+@keyframes formReveal {
+    from { opacity: 0; transform: translateY(20px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.bs-reg-greeting {
+    font-size: .72rem; font-weight: 700;
+    color: #667eea; letter-spacing: 2px;
+    text-transform: uppercase; margin-bottom: .5rem;
+}
+.bs-reg-title {
+    font-size: 1.75rem; font-weight: 800;
+    color: #1e293b; letter-spacing: -.4px;
+    line-height: 1.2; margin-bottom: .4rem;
+}
+.bs-reg-sub-txt { color: #64748b; font-size: .875rem; margin-bottom: .5rem; }
+
+/* Error */
+.bs-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-left: 3px solid #ef4444;
+    border-radius: 10px;
+    padding: .75rem 1rem;
+    margin-bottom: 1.25rem;
+    color: #dc2626; font-size: .85rem;
+    display: flex; align-items: flex-start; gap: .5rem;
+}
+
+/* Section label */
+.bs-section {
+    font-size: .68rem; font-weight: 800;
+    color: #667eea; letter-spacing: 2px;
+    text-transform: uppercase;
+    border-bottom: 1.5px solid #eef2ff;
+    padding-bottom: .5rem;
+    margin: 1.5rem 0 1rem;
+}
+.bs-section:first-of-type { margin-top: 0; }
+
+/* 2-col grid */
+.bs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 1rem; }
+.bs-full { grid-column: 1 / -1; }
+
+/* Field */
+.bs-field { margin-bottom: 1.1rem; }
+.bs-field label {
+    display: block;
+    font-size: .71rem; font-weight: 700;
+    color: #374151; letter-spacing: .7px;
+    text-transform: uppercase; margin-bottom: .45rem;
+}
+.bs-fw { position: relative; }
+.bs-field input,
+.bs-field select {
+    width: 100%;
+    background: #eef0f5;
+    border: 1.5px solid #e2e8f0;
+    border-radius: 10px;
+    padding: .8rem 1.1rem;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: .92rem; color: #1e293b;
+    transition: border-color .2s, box-shadow .2s, background .2s;
+    outline: none;
+    -webkit-appearance: none; appearance: none;
+}
+.bs-field input:focus,
+.bs-field select:focus {
+    background: #fff;
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102,126,234,.15);
+}
+.bs-field input::placeholder { color: #9ca3af; }
+.bs-field input.has-eye { padding-right: 3rem; }
+.bs-field-err {
+    color: #dc2626; font-size: .77rem;
+    margin-top: .3rem; list-style: none; padding: 0;
+}
+
+/* Select arrow */
+.bs-sel-wrap { position: relative; }
+.bs-sel-wrap::after {
+    content: '\F282'; font-family: 'Bootstrap-icons';
+    position: absolute; right: 1rem; top: 50%;
+    transform: translateY(-50%);
+    color: #667eea; pointer-events: none; font-size: .85rem;
+}
+
+/* Eye toggle */
+.bs-eye {
+    position: absolute; right: .95rem; top: 50%;
+    transform: translateY(-50%);
+    background: none; border: none;
+    color: #9ca3af; cursor: pointer;
+    font-size: 1rem; padding: 0; transition: color .2s;
+}
+.bs-eye:hover { color: #667eea; }
+
+/* Submit */
+.bs-btn-reg {
+    width: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: #fff;
+    border: none; border-radius: 10px;
+    padding: .9rem 1.5rem;
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    font-size: .95rem; font-weight: 700;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center; gap: .6rem;
+    margin-top: 1.5rem; letter-spacing: .2px;
+    box-shadow: 0 4px 18px rgba(102,126,234,.4);
+    transition: transform .2s, box-shadow .2s, opacity .2s;
+}
+.bs-btn-reg:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(102,126,234,.55);
+}
+.bs-btn-reg:active { transform: translateY(0); }
+.bs-btn-reg:disabled { opacity: .7; cursor: not-allowed; transform: none !important; }
+
+/* Divider & login link */
+.bs-divider {
+    display: flex; align-items: center; gap: .75rem;
+    margin: 1.4rem 0; color: #cbd5e1; font-size: .78rem;
+}
+.bs-divider::before, .bs-divider::after {
+    content: ''; flex: 1; height: 1px; background: #e2e8f0;
+}
+.bs-login-lnk { text-align: center; color: #64748b; font-size: .875rem; }
+.bs-login-lnk a {
+    color: #667eea; font-weight: 700; text-decoration: none; transition: color .2s;
+}
+.bs-login-lnk a:hover { color: #4f46e5; text-decoration: underline; }
+
+.bs-secure {
+    display: flex; align-items: center; justify-content: center;
+    gap: .45rem; margin-top: 1.4rem; padding-top: 1.2rem;
+    border-top: 1px solid #f1f5f9;
+    color: #94a3b8; font-size: .72rem;
+}
+.bs-secure i { color: #10b981; }
+
+/* Responsive */
+@media (max-width: 860px) {
+    .bs-reg-root { flex-direction: column; }
+    .bs-reg-left { width: 100%; padding: 2rem; }
+    .bs-steps { display: none; }
+    .bs-reg-headline { font-size: 1.7rem; }
+}
+@media (max-width: 520px) {
+    .bs-grid { grid-template-columns: 1fr; }
+    .bs-full { grid-column: 1; }
+}
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="bs-reg-root">
+
+  <!-- LEFT: Brand Panel -->
+  <div class="bs-reg-left">
+    <div class="bs-rl-top">
+      <div class="bs-logo">
+        <div class="bs-logo-mark"><i class="bi bi-wallet2"></i></div>
+        <span class="bs-logo-name">Bansking System</span>
+      </div>
+
+      <h1 class="bs-reg-headline">Open your<br><em>digital</em><br>account today.</h1>
+      <p class="bs-reg-sub">Join thousands who trust Bansking System for secure, borderless money management.</p>
+
+      <div class="bs-steps">
+        <div class="bs-step">
+          <div class="bs-step-num">01</div>
+          <div>
+            <span class="bs-step-strong">Create your account</span>
+            <span class="bs-step-sub">Fill in your details and choose your currency</span>
+          </div>
+        </div>
+        <div class="bs-step">
+          <div class="bs-step-num">02</div>
+          <div>
+            <span class="bs-step-strong">Receive your welcome balance</span>
+            <span class="bs-step-sub">Funds ready to transfer immediately</span>
+          </div>
+        </div>
+        <div class="bs-step">
+          <div class="bs-step-num">03</div>
+          <div>
+            <span class="bs-step-strong">Send & receive globally</span>
+            <span class="bs-step-sub">GBP, USD or EUR with live conversion rates</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="bs-rl-bot">
+      <div class="bs-badges">
+        <div class="bs-badge"><i class="bi bi-shield-lock-fill"></i> Bank-grade security</div>
+        <div class="bs-badge"><i class="bi bi-currency-exchange"></i> Multi-currency support</div>
+        <div class="bs-badge"><i class="bi bi-lightning-charge-fill"></i> Instant transfers</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT: Form Panel -->
+  <div class="bs-reg-right">
+    <div class="bs-reg-box">
+
+      <div class="bs-reg-greeting">New Account</div>
+      <h2 class="bs-reg-title">Create your account</h2>
+      <p class="bs-reg-sub-txt">All fields required. Takes less than 2 minutes.</p>
+
+      {% if form.non_field_errors %}
+      <div class="bs-error">
+        <i class="bi bi-exclamation-circle-fill"></i>
+        <span>{% for error in form.non_field_errors %}{{ error }}{% endfor %}</span>
+      </div>
+      {% endif %}
+
+      <form method="post" id="registerForm" novalidate>
+        {% csrf_token %}
+
+        <!-- Personal Info -->
+        <div class="bs-section">Personal Information</div>
+        <div class="bs-grid">
+
+          <div class="bs-field">
+            <label for="id_first_name"><i class="bi bi-person me-1"></i>First Name</label>
+            <div class="bs-fw">
+              <input type="text" name="first_name" id="id_first_name"
+                placeholder="e.g. Sarah"
+                value="{{ form.first_name.value|default:'' }}" autofocus>
+            </div>
+            {% if form.first_name.errors %}
+            <ul class="bs-field-err">{% for e in form.first_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+            {% endif %}
+          </div>
+
+          <div class="bs-field">
+            <label for="id_last_name"><i class="bi bi-person me-1"></i>Last Name</label>
+            <div class="bs-fw">
+              <input type="text" name="last_name" id="id_last_name"
+                placeholder="e.g. Ahmed"
+                value="{{ form.last_name.value|default:'' }}">
+            </div>
+            {% if form.last_name.errors %}
+            <ul class="bs-field-err">{% for e in form.last_name.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+            {% endif %}
+          </div>
+
+          <div class="bs-field bs-full">
+            <label for="id_email"><i class="bi bi-envelope me-1"></i>Email Address</label>
+            <div class="bs-fw">
+              <input type="email" name="email" id="id_email"
+                placeholder="yourname@email.com"
+                value="{{ form.email.value|default:'' }}">
+            </div>
+            {% if form.email.errors %}
+            <ul class="bs-field-err">{% for e in form.email.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+            {% endif %}
+          </div>
+
+        </div>
+
+        <!-- Account Details -->
+        <div class="bs-section">Account Details</div>
+        <div class="bs-grid">
+
+          <div class="bs-field bs-full">
+            <label for="id_username"><i class="bi bi-at me-1"></i>Username</label>
+            <div class="bs-fw">
+              <input type="text" name="username" id="id_username"
+                placeholder="Choose a unique username"
+                value="{{ form.username.value|default:'' }}"
+                autocomplete="username">
+            </div>
+            {% if form.username.errors %}
+            <ul class="bs-field-err">{% for e in form.username.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+            {% endif %}
+          </div>
+
+          <div class="bs-field">
+            <label for="id_password"><i class="bi bi-lock me-1"></i>Password</label>
+            <div class="bs-fw">
+              <input type="password" name="password" id="id_password"
+                placeholder="Create a password"
+                autocomplete="new-password" class="has-eye">
+              <button type="button" class="bs-eye" data-target="id_password" aria-label="Toggle password">
+                <i class="bi bi-eye-fill"></i>
+              </button>
+            </div>
+            {% if form.password.errors %}
+            <ul class="bs-field-err">{% for e in form.password.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+            {% endif %}
+          </div>
+
+          <div class="bs-field">
+            <label for="id_password_confirm"><i class="bi bi-lock-fill me-1"></i>Confirm Password</label>
+            <div class="bs-fw">
+              <input type="password" name="password_confirm" id="id_password_confirm"
+                placeholder="Repeat your password"
+                autocomplete="new-password" class="has-eye">
+              <button type="button" class="bs-eye" data-target="id_password_confirm" aria-label="Toggle confirm">
+                <i class="bi bi-eye-fill"></i>
+              </button>
+            </div>
+            {% if form.password_confirm.errors %}
+            <ul class="bs-field-err">{% for e in form.password_confirm.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+            {% endif %}
+          </div>
+
+          <div class="bs-field bs-full">
+            <label for="id_currency"><i class="bi bi-currency-exchange me-1"></i>Preferred Currency</label>
+            <div class="bs-sel-wrap">
+              <select name="currency" id="id_currency">
+                <option value="GBP" {% if form.currency.value == 'GBP' %}selected{% endif %}>🇬🇧 GB Pounds (GBP £)</option>
+                <option value="USD" {% if form.currency.value == 'USD' %}selected{% endif %}>🇺🇸 US Dollars (USD $)</option>
+                <option value="EUR" {% if form.currency.value == 'EUR' %}selected{% endif %}>🇪🇺 Euros (EUR €)</option>
+              </select>
+            </div>
+            {% if form.currency.errors %}
+            <ul class="bs-field-err">{% for e in form.currency.errors %}<li>{{ e }}</li>{% endfor %}</ul>
+            {% endif %}
+          </div>
+
+        </div>
+
+        <button type="submit" class="bs-btn-reg" id="registerBtn">
+          <i class="bi bi-person-check-fill"></i>
+          Open My Account
+          <i class="bi bi-arrow-right-short" style="margin-left:auto;font-size:1.2rem;opacity:.7;"></i>
+        </button>
+      </form>
+
+      <div class="bs-divider">existing member?</div>
+      <div class="bs-login-lnk">
+        Already have an account? <a href="{% url 'login' %}">Sign in here</a>
+      </div>
+
+      <div class="bs-secure">
+        <i class="bi bi-shield-check-fill"></i>
+        Your data is encrypted and never shared with third parties
+      </div>
+
+    </div>
+  </div>
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+(function(){
+  document.querySelectorAll('.bs-eye').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      var input = document.getElementById(btn.getAttribute('data-target'));
+      var icon  = btn.querySelector('i');
+      if(!input) return;
+      var show = input.type === 'password';
+      input.type = show ? 'text' : 'password';
+      icon.className = show ? 'bi bi-eye-slash-fill' : 'bi bi-eye-fill';
+    });
+  });
+
+  var form = document.getElementById('registerForm');
+  var btn  = document.getElementById('registerBtn');
+  if(form && btn){
+    form.addEventListener('submit', function(){
+      btn.disabled = true;
+      btn.innerHTML = '<i class="bi bi-hourglass-split me-2"></i> Creating your account…';
+    });
+  }
+})();
+</script>
+{% endblock %}

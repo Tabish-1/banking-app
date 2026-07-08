@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Banking System{% endblock %}</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
+<!-- NAVBAR -->
+<nav class="navbar-modern">
+    <div class="navbar-inner">
+
+        {% if user.is_authenticated %}
+        <button class="mobile-toggle" id="mobileMenuBtn" aria-label="Toggle menu">
+            <i class="bi bi-grid-fill fs-5"></i>
+        </button>
+        {% endif %}
+
+        <a class="navbar-brand" href="{% if user.is_authenticated %}{% url 'dashboard' %}{% else %}/{% endif %}">
+            <div class="brand-icon"><i class="bi bi-wallet2"></i></div>
+            <span>Banking System</span>
+        </a>
+
+        <div class="navbar-spacer"></div>
+
+        {% if user.is_authenticated %}
+        <div style="position:relative;" id="userChipWrap">
+            <div class="user-chip" id="userChip">
+                <div class="user-avatar">{{ user.get_full_name|default:user.username|first|upper }}</div>
+                <span class="user-chip-name">{{ user.get_full_name|default:user.username }}</span>
+                <i class="bi bi-chevron-down user-chip-arrow"></i>
+            </div>
+
+            <!-- Desktop popup -->
+            <div class="user-popup" id="userPopup">
+                <div class="popup-header">
+                    <div class="popup-avatar-big">{{ user.get_full_name|default:user.username|first|upper }}</div>
+                    <div class="popup-header-info">
+                        <div class="popup-fullname">{{ user.get_full_name|default:user.username }}</div>
+                        <div class="popup-role">{% if user.profile.is_admin %}Administrator{% else %}Member{% endif %}</div>
+                    </div>
+                </div>
+                <div class="popup-body">
+                    <div class="popup-info-row">
+                        <div class="popup-info-icon"><i class="bi bi-person-badge"></i></div>
+                        <div>
+                            <div class="popup-info-label">Username</div>
+                            <div class="popup-info-value">{{ user.username }}</div>
+                        </div>
+                    </div>
+                    <div class="popup-info-row">
+                        <div class="popup-info-icon"><i class="bi bi-hash"></i></div>
+                        <div>
+                            <div class="popup-info-label">User ID</div>
+                            <div class="popup-info-value">#{{ user.id }}</div>
+                        </div>
+                    </div>
+                    <div class="popup-info-row">
+                        <div class="popup-info-icon"><i class="bi bi-envelope-fill"></i></div>
+                        <div>
+                            <div class="popup-info-label">Email</div>
+                            <div class="popup-info-value" title="{{ user.email }}">{{ user.email }}</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="popup-footer">
+                    <a href="/webapps2026/logout/" class="popup-logout-btn">
+                        <i class="bi bi-box-arrow-right"></i> Sign Out
+                    </a>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+    </div>
+</nav>
+
+<!-- APP LAYOUT -->
+<div class="app-layout">
+
+    {% if user.is_authenticated %}
+    <div class="sidebar-wrapper" id="sidebarWrapper">
+        <div class="sidebar-modern">
+
+            <!-- Mobile: user card -->
+            <div class="sidebar-user-card">
+                <div class="suc-top">
+                    <div class="suc-avatar">{{ user.get_full_name|default:user.username|first|upper }}</div>
+                    <div style="min-width:0; flex:1;">
+                        <div class="suc-name">{{ user.get_full_name|default:user.username }}</div>
+                        <div class="suc-id"><i class="bi bi-hash"></i>{{ user.id }}</div>
+                    </div>
+                </div>
+                <div class="suc-info-rows">
+                    <div class="suc-info-item"><i class="bi bi-person-badge"></i><span>{{ user.username }}</span></div>
+                    <div class="suc-info-item"><i class="bi bi-envelope-fill"></i><span title="{{ user.email }}">{{ user.email }}</span></div>
+                    <div class="suc-info-item"><i class="bi bi-shield-fill"></i><span>{% if user.profile.is_admin %}Administrator{% else %}Member{% endif %}</span></div>
+                </div>
+            </div>
+
+            <!-- Nav links -->
+            <div class="sidebar-nav">
+                {% if user.profile.is_admin %}
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'admin_dashboard' %}active{% endif %}" href="{% url 'admin_dashboard' %}">
+                            <i class="bi bi-speedometer2"></i><span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'admin_users' %}active{% endif %}" href="{% url 'admin_users' %}">
+                            <i class="bi bi-people-fill"></i><span>All Users</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'admin_transactions' %}active{% endif %}" href="{% url 'admin_transactions' %}">
+                            <i class="bi bi-list-ul"></i><span>All Transactions</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'admin_register' %}active{% endif %}" href="{% url 'admin_register' %}">
+                            <i class="bi bi-person-plus-fill"></i><span>Register Admin</span>
+                        </a>
+                    </li>
+                </ul>
+                {% else %}
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'dashboard' %}active{% endif %}" href="{% url 'dashboard' %}">
+                            <i class="bi bi-house-door-fill"></i><span>Dashboard</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'send_payment' %}active{% endif %}" href="{% url 'send_payment' %}">
+                            <i class="bi bi-send-fill"></i><span>Send Money</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'request_payment' %}active{% endif %}" href="{% url 'request_payment' %}">
+                            <i class="bi bi-arrow-down-left-circle-fill"></i><span>Request Money</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'transactions' %}active{% endif %}" href="{% url 'transactions' %}">
+                            <i class="bi bi-clock-history"></i><span>Transactions</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link {% if request.resolver_match.url_name == 'notifications' %}active{% endif %}" href="{% url 'notifications' %}">
+                            <i class="bi bi-bell-fill"></i>
+                            <span>Notifications</span>
+                            <span class="notif-badge {% if not unread_notifications %}hidden{% endif %}"
+                                  id="notifBadge"
+                                  data-count="{{ unread_notifications|default:0 }}">
+                                {{ unread_notifications|default:0 }}
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+                {% endif %}
+            </div>
+
+            <!-- Mobile: back + sign out -->
+            <div class="sidebar-bottom-btns">
+                <button class="sidebar-back-btn" id="sidebarBackBtn">
+                    <i class="bi bi-arrow-left"></i> Back
+                </button>
+                <a href="/webapps2026/logout/" class="sidebar-logout-btn">
+                    <i class="bi bi-box-arrow-right"></i> Sign Out
+                </a>
+            </div>
+
+        </div>
+    </div>
+    {% endif %}
+
+    <div class="main-content">
+        {% if messages %}
+            {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-modern alert-dismissible fade show" role="alert">
+                <i class="bi bi-{% if message.tags == 'success' %}check-circle-fill{% elif message.tags == 'error' %}exclamation-triangle-fill{% else %}info-circle-fill{% endif %} me-2"></i>
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endfor %}
+        {% endif %}
+
+        {% block content %}{% endblock %}
+    </div>
+
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+$(document).ready(function () {
+
+    const $sidebar = $('#sidebarWrapper');
+    const $overlay = $('#sidebarOverlay');
+
+    function isMobile() { return $(window).width() <= 768; }
+
+    function openSidebar()  { $sidebar.addClass('show'); $overlay.addClass('show'); $('body').css('overflow','hidden'); }
+    function closeSidebar() { $sidebar.removeClass('show'); $overlay.removeClass('show'); $('body').css('overflow',''); }
+
+    $('#mobileMenuBtn').on('click', function(e) { e.stopPropagation(); openSidebar(); });
+
+    $('#userChip').on('click', function(e) {
+        e.stopPropagation();
+        if (isMobile()) {
+            openSidebar();
+        } else {
+            var open = $('#userPopup').hasClass('show');
+            $('#userPopup').toggleClass('show', !open);
+            $(this).toggleClass('open', !open);
+        }
+    });
+
+    $(document).on('click', function(e) {
+        if (!$('#userChipWrap').is(e.target) && !$('#userChipWrap').has(e.target).length) {
+            $('#userPopup').removeClass('show');
+            $('#userChip').removeClass('open');
+        }
+    });
+
+    $overlay.on('click', closeSidebar);
+    $('#sidebarBackBtn').on('click', function(e) { e.stopPropagation(); closeSidebar(); });
+    $('.nav-link').on('click', function() { if (isMobile()) closeSidebar(); });
+    $(window).on('resize', function() { if (!isMobile()) closeSidebar(); });
+
+    /* Notification badge */
+    const $badge = $('#notifBadge');
+
+    function updateBadge(n) {
+        n = parseInt(n, 10);
+        if (n > 0) { $badge.text(n > 99 ? '99+' : n).removeClass('hidden'); }
+        else        { $badge.addClass('hidden'); }
+    }
+
+    updateBadge($badge.attr('data-count') || 0);
+
+    setInterval(function() {
+        $.get('/webapps2026/notifications/count/')
+         .done(function(d) { if (d && d.unread !== undefined) updateBadge(d.unread); });
+    }, 30000);
+
+    if (window.location.pathname.indexOf('/notifications') !== -1) updateBadge(0);
+
+    /* Auto-dismiss alerts */
+    setTimeout(function() {
+        $('.alert').fadeOut('slow', function() { $(this).alert('close'); });
+    }, 5000);
+
+});
+</script>
+
+{% block extra_js %}{% endblock %}
+</body>
+</html>

@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Transactions - Bansking System{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="mb-5">
+        <h4 class="mb-2">
+            <i class="bi bi-clock-history me-2" style="color:#667eea;"></i>
+            <span class="section-header">Transaction History</span>
+        </h4>
+        <p class="text-muted small" style="margin-top:12px;">Track all your payments and requests in one place</p>
+        <hr class="custom-divider">
+    </div>
+
+    {% if error %}
+    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="border-radius:16px;border-left:4px solid #dc2626;">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>{{ error }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+    </div>
+    {% endif %}
+
+    <!-- Sent Payments -->
+    <div class="transaction-card card shadow-sm mb-4">
+        <div class="card-body p-0">
+            <div class="p-4" style="background:linear-gradient(135deg,#f8f9ff,#fff);">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="icon-circle icon-sent"><i class="bi bi-send-fill fs-5"></i></div>
+                    <h6 class="mb-0 fw-bold" style="color:#4c51bf;">Sent Payments</h6>
+                    <span class="badge bg-light text-dark ms-3 rounded-pill">{{ sent|length }}</span>
+                </div>
+            </div>
+            {% if sent %}
+            <div class="table-responsive">
+                <table class="modern-table table mb-0">
+                    <thead><tr>
+                        <th><i class="bi bi-person me-1"></i>To</th>
+                        <th><i class="bi bi-cash-stack me-1"></i>Amount</th>
+                        <th><i class="bi bi-arrow-left-right me-1"></i>Converted</th>
+                        <th><i class="bi bi-calendar3 me-1"></i>Date</th>
+                    </tr></thead>
+                    <tbody>
+                        {% for t in sent %}
+                        <tr>
+                            <td><div class="d-flex align-items-center"><div class="rounded-circle bg-light p-2 me-2" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;"><i class="bi bi-person-circle text-secondary"></i></div><span class="fw-semibold">{{ t.receiver.get_full_name|default:t.receiver.username }}</span></div></td>
+                            <td class="amount-negative">- {{ t.amount }} {{ t.sender_currency }}</td>
+                            <td class="text-muted">{{ t.converted_amount }} {{ t.receiver_currency }}</td>
+                            <td class="text-muted small">{{ t.timestamp|date:"d M Y, H:i" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state"><i class="bi bi-send-slash"></i><p class="text-muted mb-0">No sent payments yet</p><small class="text-muted">Your outgoing payments will appear here</small></div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Received Payments -->
+    <div class="transaction-card card shadow-sm mb-4">
+        <div class="card-body p-0">
+            <div class="p-4" style="background:linear-gradient(135deg,#f0fdf4,#fff);">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="icon-circle icon-received"><i class="bi bi-arrow-down-circle-fill fs-5"></i></div>
+                    <h6 class="mb-0 fw-bold" style="color:#059669;">Received Payments</h6>
+                    <span class="badge bg-light text-dark ms-3 rounded-pill">{{ received|length }}</span>
+                </div>
+            </div>
+            {% if received %}
+            <div class="table-responsive">
+                <table class="modern-table table mb-0">
+                    <thead><tr>
+                        <th><i class="bi bi-person me-1"></i>From</th>
+                        <th><i class="bi bi-cash-stack me-1"></i>Amount</th>
+                        <th><i class="bi bi-calendar3 me-1"></i>Date</th>
+                    </tr></thead>
+                    <tbody>
+                        {% for t in received %}
+                        <tr>
+                            <td><div class="d-flex align-items-center"><div class="rounded-circle bg-light p-2 me-2" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;"><i class="bi bi-person-circle text-secondary"></i></div><span class="fw-semibold">{{ t.sender.get_full_name|default:t.sender.username }}</span></div></td>
+                            <td class="amount-positive">+ {{ t.converted_amount }} {{ t.receiver_currency }}</td>
+                            <td class="text-muted small">{{ t.timestamp|date:"d M Y, H:i" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state"><i class="bi bi-inbox"></i><p class="text-muted mb-0">No received payments yet</p><small class="text-muted">Incoming payments will show up here</small></div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Requests Received -->
+    <div class="transaction-card card shadow-sm mb-4">
+        <div class="card-body p-0">
+            <div class="p-4" style="background:linear-gradient(135deg,#fffbeb,#fff);">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="icon-circle icon-request-received"><i class="bi bi-bell-fill fs-5"></i></div>
+                    <h6 class="mb-0 fw-bold" style="color:#d97706;">Payment Requests Received</h6>
+                    <span class="badge bg-light text-dark ms-3 rounded-pill">{{ payment_requests_received|length }}</span>
+                </div>
+            </div>
+            {% if payment_requests_received %}
+            <div class="table-responsive">
+                <table class="modern-table table mb-0">
+                    <thead><tr>
+                        <th><i class="bi bi-person me-1"></i>From</th>
+                        <th><i class="bi bi-cash-stack me-1"></i>Amount</th>
+                        <th><i class="bi bi-tag me-1"></i>Status</th>
+                        <th><i class="bi bi-calendar3 me-1"></i>Date</th>
+                        <th><i class="bi bi-gear me-1"></i>Action</th>
+                    </tr></thead>
+                    <tbody>
+                        {% for r in payment_requests_received %}
+                        <tr>
+                            <td><div class="d-flex align-items-center"><div class="rounded-circle bg-light p-2 me-2" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;"><i class="bi bi-person-circle text-secondary"></i></div><span class="fw-semibold">{{ r.requester.get_full_name|default:r.requester.username }}</span></div></td>
+                            <td class="fw-bold">{{ r.amount }} {{ r.currency }}</td>
+                            <td>
+                                {% if r.status == 'PENDING' %}<span class="badge-modern badge-pending"><i class="bi bi-hourglass-split me-1"></i>Pending</span>
+                                {% elif r.status == 'ACCEPTED' %}<span class="badge-modern badge-accepted"><i class="bi bi-check-circle me-1"></i>Accepted</span>
+                                {% else %}<span class="badge-modern badge-rejected"><i class="bi bi-x-circle me-1"></i>Rejected</span>{% endif %}
+                            </td>
+                            <td class="text-muted small">{{ r.timestamp|date:"d M Y, H:i" }}</td>
+                            <td>
+                                {% if r.status == 'PENDING' %}
+                                <form method="post" action="/webapps2026/handle-request/{{ r.pk }}/" class="d-inline">
+                                    {% csrf_token %}
+                                    <button name="action" value="accept" class="btn-action btn-accept"><i class="bi bi-check-lg me-1"></i>Accept</button>
+                                    <button name="action" value="reject" class="btn-action btn-reject"><i class="bi bi-x-lg me-1"></i>Reject</button>
+                                </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state"><i class="bi bi-bell-slash"></i><p class="text-muted mb-0">No payment requests received</p></div>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Requests Sent -->
+    <div class="transaction-card card shadow-sm mb-4">
+        <div class="card-body p-0">
+            <div class="p-4" style="background:linear-gradient(135deg,#f0f9ff,#fff);">
+                <div class="d-flex align-items-center mb-3">
+                    <div class="icon-circle icon-request-sent"><i class="bi bi-arrow-up-circle-fill fs-5"></i></div>
+                    <h6 class="mb-0 fw-bold" style="color:#0891b2;">Payment Requests Sent</h6>
+                    <span class="badge bg-light text-dark ms-3 rounded-pill">{{ payment_requests_sent|length }}</span>
+                </div>
+            </div>
+            {% if payment_requests_sent %}
+            <div class="table-responsive">
+                <table class="modern-table table mb-0">
+                    <thead><tr>
+                        <th><i class="bi bi-person me-1"></i>To</th>
+                        <th><i class="bi bi-cash-stack me-1"></i>Amount</th>
+                        <th><i class="bi bi-tag me-1"></i>Status</th>
+                        <th><i class="bi bi-calendar3 me-1"></i>Date</th>
+                    </tr></thead>
+                    <tbody>
+                        {% for r in payment_requests_sent %}
+                        <tr>
+                            <td><div class="d-flex align-items-center"><div class="rounded-circle bg-light p-2 me-2" style="width:32px;height:32px;display:flex;align-items:center;justify-content:center;"><i class="bi bi-person-circle text-secondary"></i></div><span class="fw-semibold">{{ r.requestee.get_full_name|default:r.requestee.username }}</span></div></td>
+                            <td class="fw-bold">{{ r.amount }} {{ r.currency }}</td>
+                            <td>
+                                {% if r.status == 'PENDING' %}<span class="badge-modern badge-pending"><i class="bi bi-hourglass-split me-1"></i>Pending</span>
+                                {% elif r.status == 'ACCEPTED' %}<span class="badge-modern badge-accepted"><i class="bi bi-check-circle me-1"></i>Accepted</span>
+                                {% else %}<span class="badge-modern badge-rejected"><i class="bi bi-x-circle me-1"></i>Rejected</span>{% endif %}
+                            </td>
+                            <td class="text-muted small">{{ r.timestamp|date:"d M Y, H:i" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            {% else %}
+            <div class="empty-state"><i class="bi bi-arrow-up-circle"></i><p class="text-muted mb-0">No payment requests sent</p></div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}
