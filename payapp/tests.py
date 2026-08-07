@@ -107,6 +107,23 @@ class SendPaymentTests(LocalRatesMixin, TestCase):
         self.assertRedirects(response, reverse('transactions'))
         self.assertEqual(self.balances(), (Decimal('490.00'), Decimal('510.00')))
 
+    def test_the_amount_preview_uses_the_senders_own_currency(self):
+        """The preview used to be hardcoded to USD for every account.
+
+        It read a `select[name="currency"]` that does not exist on this page,
+        so it always fell through to a literal 'USD'.
+        """
+        for currency in ('GBP', 'EUR'):
+            with self.subTest(currency=currency):
+                UserProfile.objects.filter(user=self.alice).update(currency=currency)
+
+                page = self.client.get(reverse('send_payment'))
+
+                self.assertContains(page, f'data-currency="{currency}"')
+                self.assertContains(page, f'0.00 {currency}')
+                # The lookup that produced the bug is gone.
+                self.assertNotContains(page, 'currSel')
+
     def test_requires_login(self):
         self.client.logout()
         response = self.client.get(reverse('send_payment'))
@@ -119,6 +136,36 @@ class SendPaymentTests(LocalRatesMixin, TestCase):
         response = self.client.get(reverse('send_payment'))
 
         self.assertRedirects(response, reverse('admin_dashboard'))
+
+
+class TemplateHygieneTests(LocalRatesMixin, TestCase):
+    """No page may leak raw template syntax to the browser.
+
+    Django's `{# ... #}` comment only works on a single line. Spread one over
+    several lines and it is not a comment at all — it renders as visible text,
+    which is how a note about output escaping ended up displayed on the
+    notifications page.
+    """
+
+    PAGES = ['dashboard', 'send_payment', 'request_payment',
+             'transactions', 'notifications']
+
+    def setUp(self):
+        super().setUp()
+        self.user = make_member('alice')
+        Notification.objects.create(user=self.user, message='A test notification')
+        self.client.force_login(self.user)
+
+    def test_no_unrendered_template_syntax(self):
+        for name in self.PAGES:
+            with self.subTest(page=name):
+                body = self.client.get(reverse(name)).content.decode()
+
+                for marker in ('{#', '#}', '{%', '%}', '{{', '}}'):
+                    self.assertNotIn(
+                        marker, body,
+                        f'{name} leaked the literal {marker} to the browser',
+                    )
 
 
 class NotificationEscapingTests(LocalRatesMixin, TestCase):

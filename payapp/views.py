@@ -161,7 +161,9 @@ def send_payment_view(request):
                 logger.exception('Transfer from %s to %s failed.', request.user.pk, receiver.pk)
                 error = 'Transaction failed. Please try again.'
 
-    return render(request, 'payapp/send_payment.html', {'form': form, 'error': error})
+    return render(request, 'payapp/send_payment.html', {
+        'form': form, 'error': error, 'profile': profile,
+    })
 
 
 @login_required

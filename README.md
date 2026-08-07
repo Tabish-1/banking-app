@@ -7,7 +7,9 @@
 
 A Django web application for sending and requesting money between users, with automatic currency conversion across GBP, USD and EUR handled by an internal REST service.
 
-Balances move under database row locks, money is `Decimal` end to end, and configuration is production-safe by default. 65 tests cover the transfer and settlement paths, including the ones that are supposed to fail.
+Balances move under database row locks, money is `Decimal` end to end, and configuration is production-safe by default. 76 tests cover the transfer and settlement paths, including the ones that are supposed to fail.
+
+![The member dashboard, showing an available balance and recent activity](docs/dashboard.png)
 
 ## Features
 
@@ -17,6 +19,18 @@ Balances move under database row locks, money is `Decimal` end to end, and confi
 - Currency conversion through an internal REST endpoint, with a logged fallback
 - Notifications for every payment event
 - Admin dashboard covering all users, balances and transactions
+
+## Screens
+
+| Sending a payment | Transaction history |
+|---|---|
+| ![The send money form, with a recipient email and amount entered](docs/send-money.png) | ![Sent and received payments, and a pending request awaiting a decision](docs/transactions.png) |
+
+Amounts are entered in the sender's own currency and converted on arrival — above, three transfers from a GBP account landing in a USD one. The pending request at the bottom of the history is awaiting an accept or reject.
+
+![The admin dashboard, listing every registered user with their currency and balance](docs/admin-dashboard.png)
+
+Administrators get a separate view over every user, balance and transaction. There is no default admin account; one is created explicitly with `manage.py create_admin`.
 
 ## Tech Stack
 

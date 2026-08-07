@@ -43,9 +43,13 @@
                 </button>
             </form>
 
-            <div class="amount-preview" id="amountPreview">
+            {% comment %}
+            The currency comes from the sender's own profile: you always send in
+            the currency you hold, and the recipient is credited after conversion.
+            {% endcomment %}
+            <div class="amount-preview" id="amountPreview" data-currency="{{ profile.currency }}">
                 <small class="text-muted d-block mb-1">You're about to send</small>
-                <strong id="previewAmount" style="font-size:1.2rem;color:#667eea;">£0.00</strong>
+                <strong id="previewAmount" style="font-size:1.2rem;color:#667eea;">0.00 {{ profile.currency }}</strong>
                 <div class="progress mt-2" style="height:4px;">
                     <div class="progress-bar" style="background:linear-gradient(90deg,#667eea,#764ba2);width:0%;"></div>
                 </div>
@@ -61,13 +65,17 @@
     var amountInput = document.querySelector('input[name="amount"]');
     var previewBox  = document.getElementById('amountPreview');
     var previewSpan = document.getElementById('previewAmount');
-    var currSel     = document.querySelector('select[name="currency"]');
+    // This page has no currency selector — you send in the currency you hold —
+    // so the value is rendered by the server. It previously looked for a
+    // select that does not exist and fell back to a hardcoded 'USD', which was
+    // wrong for every account not denominated in dollars.
+    var currency = previewBox ? previewBox.dataset.currency : '';
 
     if (amountInput) {
         amountInput.addEventListener('input', function() {
             var val = this.value;
             if (val && !isNaN(val) && parseFloat(val) > 0) {
-                previewSpan.innerHTML = parseFloat(val).toFixed(2) + ' ' + (currSel ? currSel.value : 'USD');
+                previewSpan.innerHTML = parseFloat(val).toFixed(2) + ' ' + currency;
                 previewBox.classList.add('active');
             } else {
                 previewBox.classList.remove('active');

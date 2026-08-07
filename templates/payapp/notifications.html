@@ -4,8 +4,10 @@
 {% block title %}Notifications - Bansking System{% endblock %}
 
 {% block content %}
-{# This page has no <form>, but its AJAX calls need a CSRF token. Rendering one
-   here also guarantees the csrftoken cookie is set for the fallback path. #}
+{% comment %}
+This page has no <form>, but its AJAX calls need a CSRF token. Rendering one
+here also guarantees the csrftoken cookie is set for the fallback path.
+{% endcomment %}
 {% csrf_token %}
 
 <!-- Toast container -->
@@ -69,8 +71,11 @@
                 </div>
 
                 <div class="flex-grow-1" style="min-width:0;">
-                    {# Not |safe: messages embed user-supplied names, which would
-                       otherwise let anyone store script in a recipient's page. #}
+                    {% comment %}
+                    Deliberately not |safe: messages embed user-supplied names,
+                    which would otherwise let anyone store script in a
+                    recipient's page.
+                    {% endcomment %}
                     <div class="notif-msg">{{ n.message }}</div>
                     <div class="notif-meta">
                         <span class="time-pill">
