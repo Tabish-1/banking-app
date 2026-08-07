@@ -222,6 +222,11 @@ class EntryPointTests(LocalRatesMixin, TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'csrfmiddlewaretoken')
 
+    def test_djangos_own_admin_site_is_not_exposed(self):
+        """This project serves its own admin; Django's would be a second,
+        unused authentication endpoint."""
+        self.assertEqual(self.client.get('/admin/').status_code, 404)
+
     def test_signed_in_user_lands_on_the_dashboard(self):
         user = User.objects.create_user('member', 'member@example.com', STRONG_PASSWORD)
         UserProfile.objects.create(user=user, balance=Decimal('10.00'))

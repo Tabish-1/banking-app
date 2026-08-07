@@ -43,8 +43,10 @@ ALLOWED_HOSTS = [
     if host.strip()
 ]
 
+# django.contrib.admin is deliberately absent. This project ships its own
+# administration screens under /webapps2026/admin/, so enabling Django's would
+# add a second, unused authentication endpoint and nothing else.
 INSTALLED_APPS = [
-    'django.contrib.admin',
     'django.contrib.contenttypes',
     'django.contrib.auth',
     'django.contrib.sessions',

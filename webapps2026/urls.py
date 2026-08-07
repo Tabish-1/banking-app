@@ -1,10 +1,9 @@
-from django.contrib import admin
 from django.urls import include, path
 from django.views.generic import RedirectView
 
+# Django's own admin site is not enabled — see INSTALLED_APPS in settings.py.
+# Administration lives at /webapps2026/admin/, served by payapp and register.
 urlpatterns = [
-    path('admin/', admin.site.urls),
-
     path('webapps2026/', include('register.urls')),
     path('webapps2026/', include('payapp.urls')),
     path('webapps2026/', include('conversionservice.urls')),
