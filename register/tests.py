@@ -158,6 +158,81 @@ class LoginTests(LocalRatesMixin, TestCase):
         self.assertRedirects(response, reverse('admin_dashboard'))
 
 
+class SignInIdentifierTests(LocalRatesMixin, TestCase):
+    """Payments are addressed by email, so the login screen accepts one too."""
+
+    def setUp(self):
+        super().setUp()
+        self.user = User.objects.create_user(
+            'tabish', 'Tabish@Example.com', STRONG_PASSWORD
+        )
+        UserProfile.objects.create(user=self.user, balance=Decimal('10.00'))
+
+    def _login(self, identifier):
+        return self.client.post(
+            reverse('login'), {'username': identifier, 'password': STRONG_PASSWORD}
+        )
+
+    def test_username_works(self):
+        self.assertRedirects(self._login('tabish'), reverse('dashboard'))
+
+    def test_email_works(self):
+        self.assertRedirects(self._login('Tabish@Example.com'), reverse('dashboard'))
+
+    def test_email_is_case_insensitive(self):
+        self.assertRedirects(self._login('tabish@example.com'), reverse('dashboard'))
+
+    def test_username_is_case_insensitive(self):
+        self.assertRedirects(self._login('TABISH'), reverse('dashboard'))
+
+    def test_wrong_password_is_rejected(self):
+        response = self.client.post(
+            reverse('login'), {'username': 'tabish', 'password': 'not-the-password'}
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn('_auth_user_id', self.client.session)
+
+    def test_unknown_identifier_is_rejected(self):
+        response = self._login('nobody@example.com')
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn('_auth_user_id', self.client.session)
+
+    def test_the_form_says_it_accepts_either(self):
+        page = self.client.get(reverse('login'))
+        self.assertContains(page, 'Username or email')
+
+
+class EntryPointTests(LocalRatesMixin, TestCase):
+    """The addresses a newcomer actually types must not 404.
+
+    Every page lives under a sub-path, so the site root and the bare
+    /webapps2026/ prefix both used to return 404 — including the URL the
+    README tells people to open.
+    """
+
+    def test_site_root_reaches_the_login_page(self):
+        response = self.client.get('/', follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.redirect_chain[-1][0], f'{reverse("login")}?next={reverse("dashboard")}')
+
+    def test_documented_prefix_reaches_the_login_page(self):
+        response = self.client.get('/webapps2026/', follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'csrfmiddlewaretoken')
+
+    def test_signed_in_user_lands_on_the_dashboard(self):
+        user = User.objects.create_user('member', 'member@example.com', STRONG_PASSWORD)
+        UserProfile.objects.create(user=user, balance=Decimal('10.00'))
+        self.client.force_login(user)
+
+        response = self.client.get('/', follow=True)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.redirect_chain[-1][0], reverse('dashboard'))
+
+
 class LogoutTests(LocalRatesMixin, TestCase):
 
     def setUp(self):

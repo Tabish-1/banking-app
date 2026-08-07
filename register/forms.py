@@ -80,4 +80,18 @@ class AdminRegistrationForm(BaseAccountForm):
 
 
 class LoginForm(AuthenticationForm):
-    pass
+    """Sign in with either a username or an email address.
+
+    See register.backends.UsernameOrEmailBackend — the field is relabelled here
+    so the form matches what the backend actually accepts.
+    """
+
+    username = forms.CharField(label='Username or email')
+
+    error_messages = {
+        **AuthenticationForm.error_messages,
+        'invalid_login': (
+            'No account matches that username or email and password. '
+            'Note that both are case-sensitive apart from the username itself.'
+        ),
+    }

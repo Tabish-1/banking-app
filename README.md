@@ -101,7 +101,7 @@ That flag matters: session and CSRF cookies are marked *secure*, meaning browser
 
 This is a peer-to-peer payment app, so **you need two accounts** to see anything interesting.
 
-1. **Register** at `/webapps2026/register/`. Pick GBP. You start with **500.00**.
+1. **Register** at `/webapps2026/register/`. Pick GBP. You start with **500.00**. Passwords go through Django's validators, so short or common ones are rejected. You can sign back in with either your username or your email address.
 2. **Register a second account** in a private/incognito window — choose **USD** this time, so you can watch the currency conversion work. It starts with 635.00 USD, the same 500 GBP converted.
 3. **Send money.** From the first account, go to *Send Money* and use the second account's email. Send 100. The recipient is credited **127.00 USD** — converted through the REST service.
 4. **Request money.** From the second account, request 50 USD from the first. The first account sees it under *Transactions* and can accept or reject; accepting debits them the GBP equivalent.

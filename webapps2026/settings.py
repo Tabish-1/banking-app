@@ -95,6 +95,10 @@ DATABASES = {
     }
 }
 
+# Accepts a username or an email address. Subclasses ModelBackend, so it
+# remains the only backend needed — including for the Django admin site.
+AUTHENTICATION_BACKENDS = ['register.backends.UsernameOrEmailBackend']
+
 AUTH_PASSWORD_VALIDATORS = [
     {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
     {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
