@@ -6,6 +6,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db import transaction
 from django.shortcuts import redirect, render
+from django.views.decorators.http import require_POST
 
 from conversionservice.client import convert
 from register.forms import AdminRegistrationForm, LoginForm, UserRegistrationForm
@@ -66,7 +67,12 @@ def login_view(request):
 
 
 @login_required
+@require_POST
 def logout_view(request):
+    """Sign out. POST-only, so a third-party page cannot force a logout.
+
+    Django's own LogoutView has required POST since 4.1 for the same reason.
+    """
     logout(request)
     return redirect('login')
 

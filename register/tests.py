@@ -158,6 +158,34 @@ class LoginTests(LocalRatesMixin, TestCase):
         self.assertRedirects(response, reverse('admin_dashboard'))
 
 
+class LogoutTests(LocalRatesMixin, TestCase):
+
+    def setUp(self):
+        super().setUp()
+        self.user = User.objects.create_user('member', 'member@example.com', STRONG_PASSWORD)
+        UserProfile.objects.create(user=self.user, balance=Decimal('10.00'))
+        self.client.force_login(self.user)
+
+    def test_post_signs_the_user_out(self):
+        response = self.client.post(reverse('logout'))
+
+        self.assertRedirects(response, reverse('login'))
+        self.assertNotIn('_auth_user_id', self.client.session)
+
+    def test_get_cannot_sign_the_user_out(self):
+        """A third-party page must not be able to force a logout via a link."""
+        response = self.client.get(reverse('logout'))
+
+        self.assertEqual(response.status_code, 405)
+        self.assertIn('_auth_user_id', self.client.session)
+
+    def test_the_sign_out_control_is_a_csrf_protected_form(self):
+        page = self.client.get(reverse('dashboard'))
+
+        self.assertContains(page, f'action="{reverse("logout")}"')
+        self.assertContains(page, 'csrfmiddlewaretoken')
+
+
 class AdminRegistrationTests(LocalRatesMixin, TestCase):
 
     def setUp(self):

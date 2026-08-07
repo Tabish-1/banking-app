@@ -310,6 +310,10 @@ body {
 
 .popup-footer { padding: 6px 14px 14px; }
 
+/* Sign-out is a submitted form, not a link, so that it cannot be triggered by
+   a third-party page. The wrapper must not disturb the surrounding layout. */
+.logout-form { width: 100%; margin: 0; }
+
 .popup-logout-btn {
     width: 100%;
     background: var(--grad-danger);
@@ -317,8 +321,10 @@ body {
     border: none;
     padding: 11px;
     border-radius: var(--radius-md);
+    font-family: inherit;   /* buttons do not inherit this by default */
     font-weight: 600;
     font-size: .88rem;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -557,8 +563,10 @@ body {
     border: none;
     padding: 11px;
     border-radius: var(--radius-md);
+    font-family: inherit;   /* buttons do not inherit this by default */
     font-weight: 600;
     font-size: .88rem;
+    cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: center;

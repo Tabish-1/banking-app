@@ -75,9 +75,12 @@
                     </div>
                 </div>
                 <div class="popup-footer">
-                    <a href="{% url 'logout' %}" class="popup-logout-btn">
-                        <i class="bi bi-box-arrow-right"></i> Sign Out
-                    </a>
+                    <form method="post" action="{% url 'logout' %}" class="logout-form">
+                        {% csrf_token %}
+                        <button type="submit" class="popup-logout-btn">
+                            <i class="bi bi-box-arrow-right"></i> Sign Out
+                        </button>
+                    </form>
                 </div>
             </div>
         </div>
@@ -176,9 +179,12 @@
                 <button class="sidebar-back-btn" id="sidebarBackBtn">
                     <i class="bi bi-arrow-left"></i> Back
                 </button>
-                <a href="{% url 'logout' %}" class="sidebar-logout-btn">
-                    <i class="bi bi-box-arrow-right"></i> Sign Out
-                </a>
+                <form method="post" action="{% url 'logout' %}" class="logout-form">
+                    {% csrf_token %}
+                    <button type="submit" class="sidebar-logout-btn">
+                        <i class="bi bi-box-arrow-right"></i> Sign Out
+                    </button>
+                </form>
             </div>
 
         </div>
