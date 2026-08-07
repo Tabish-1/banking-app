@@ -1,6 +1,6 @@
 {% extends 'base.html' %}
 
-{% block title %}Create Account — Bansking System{% endblock %}
+{% block title %}Create Account — Banking System{% endblock %}
 
 {% block extra_css %}
 <style>
@@ -55,10 +55,6 @@
     border-radius: 12px;
     display: flex; align-items: center; justify-content: center;
     font-size: 1.3rem; color: #fff;
-}
-.bs-logo-name {
-    font-size: 1.35rem; font-weight: 800;
-    color: #fff; letter-spacing: -.3px;
 }
 
 .bs-reg-headline {
@@ -136,16 +132,6 @@
 .bs-reg-sub-txt { color: #64748b; font-size: .875rem; margin-bottom: .5rem; }
 
 /* Error */
-.bs-error {
-    background: #fef2f2;
-    border: 1px solid #fecaca;
-    border-left: 3px solid #ef4444;
-    border-radius: 10px;
-    padding: .75rem 1rem;
-    margin-bottom: 1.25rem;
-    color: #dc2626; font-size: .85rem;
-    display: flex; align-items: flex-start; gap: .5rem;
-}
 
 /* Section label */
 .bs-section {
@@ -163,7 +149,6 @@
 .bs-full { grid-column: 1 / -1; }
 
 /* Field */
-.bs-field { margin-bottom: 1.1rem; }
 .bs-field label {
     display: block;
     font-size: .71rem; font-weight: 700;
@@ -190,8 +175,6 @@
     border-color: #667eea;
     box-shadow: 0 0 0 3px rgba(102,126,234,.15);
 }
-.bs-field input::placeholder { color: #9ca3af; }
-.bs-field input.has-eye { padding-right: 3rem; }
 .bs-field-err {
     color: #dc2626; font-size: .77rem;
     margin-top: .3rem; list-style: none; padding: 0;
@@ -207,14 +190,6 @@
 }
 
 /* Eye toggle */
-.bs-eye {
-    position: absolute; right: .95rem; top: 50%;
-    transform: translateY(-50%);
-    background: none; border: none;
-    color: #9ca3af; cursor: pointer;
-    font-size: 1rem; padding: 0; transition: color .2s;
-}
-.bs-eye:hover { color: #667eea; }
 
 /* Submit */
 .bs-btn-reg {
@@ -239,13 +214,6 @@
 .bs-btn-reg:disabled { opacity: .7; cursor: not-allowed; transform: none !important; }
 
 /* Divider & login link */
-.bs-divider {
-    display: flex; align-items: center; gap: .75rem;
-    margin: 1.4rem 0; color: #cbd5e1; font-size: .78rem;
-}
-.bs-divider::before, .bs-divider::after {
-    content: ''; flex: 1; height: 1px; background: #e2e8f0;
-}
 .bs-login-lnk { text-align: center; color: #64748b; font-size: .875rem; }
 .bs-login-lnk a {
     color: #667eea; font-weight: 700; text-decoration: none; transition: color .2s;
@@ -258,7 +226,6 @@
     border-top: 1px solid #f1f5f9;
     color: #94a3b8; font-size: .72rem;
 }
-.bs-secure i { color: #10b981; }
 
 /* Responsive */
 @media (max-width: 860px) {
@@ -282,11 +249,11 @@
     <div class="bs-rl-top">
       <div class="bs-logo">
         <div class="bs-logo-mark"><i class="bi bi-wallet2"></i></div>
-        <span class="bs-logo-name">Bansking System</span>
+        <span class="bs-logo-name">Banking System</span>
       </div>
 
       <h1 class="bs-reg-headline">Open your<br><em>digital</em><br>account today.</h1>
-      <p class="bs-reg-sub">Join thousands who trust Bansking System for secure, borderless money management.</p>
+      <p class="bs-reg-sub">Join thousands who trust Banking System for secure, borderless money management.</p>
 
       <div class="bs-steps">
         <div class="bs-step">

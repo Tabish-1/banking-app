@@ -1494,3 +1494,53 @@ input[type=number]::-webkit-outer-spin-button { opacity: .5; }
     .navbar-brand span { display: none; }
     .main-content { padding: 10px; }
 }
+
+/* ─────────────────────────────────────────────────────────────
+   13. AUTH PAGES (shared by login and register)
+   Hoisted out of the two templates, which each carried an identical
+   copy. Rules that genuinely differ between the pages stay inline.
+   Kept at the end of the file so the cascade order is unchanged.
+───────────────────────────────────────────────────────────── */
+.bs-logo-name {
+    font-size: 1.35rem; font-weight: 800;
+    color: #fff; letter-spacing: -.3px;
+}
+
+.bs-divider {
+    display: flex; align-items: center; gap: .75rem;
+    margin: 1.4rem 0; color: #cbd5e1; font-size: .78rem;
+}
+
+.bs-divider::before, .bs-divider::after {
+    content: ''; flex: 1; height: 1px; background: #e2e8f0;
+}
+
+.bs-field { margin-bottom: 1.1rem; }
+
+.bs-field input::placeholder { color: #9ca3af; }
+
+.bs-field input.has-eye { padding-right: 3rem; }
+
+.bs-eye {
+    position: absolute; right: .95rem; top: 50%;
+    transform: translateY(-50%);
+    background: none; border: none;
+    color: #9ca3af; cursor: pointer;
+    font-size: 1rem; padding: 0;
+    transition: color .2s;
+}
+
+.bs-eye:hover { color: #667eea; }
+
+.bs-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-left: 3px solid #ef4444;
+    border-radius: 10px;
+    padding: .75rem 1rem;
+    margin-bottom: 1.25rem;
+    color: #dc2626; font-size: .85rem;
+    display: flex; align-items: flex-start; gap: .5rem;
+}
+
+.bs-secure i { color: #10b981; }

@@ -156,16 +156,40 @@ class TemplateHygieneTests(LocalRatesMixin, TestCase):
         Notification.objects.create(user=self.user, message='A test notification')
         self.client.force_login(self.user)
 
+    MARKERS = ('{#', '#}', '{%', '%}', '{{', '}}')
+
+    def assert_clean(self, name, body):
+        for marker in self.MARKERS:
+            self.assertNotIn(
+                marker, body, f'{name} leaked the literal {marker} to the browser'
+            )
+
     def test_no_unrendered_template_syntax(self):
         for name in self.PAGES:
             with self.subTest(page=name):
+                self.assert_clean(name, self.client.get(reverse(name)).content.decode())
+
+    def test_signed_out_pages_are_clean_too(self):
+        self.client.logout()
+        for name in ('login', 'register'):
+            with self.subTest(page=name):
+                self.assert_clean(name, self.client.get(reverse(name)).content.decode())
+
+    def test_the_product_name_is_spelled_consistently(self):
+        """'Bansking System' was shipped on ten pages, including both titles."""
+        pages = [(n, True) for n in self.PAGES] + [('login', False), ('register', False)]
+
+        for name, needs_login in pages:
+            with self.subTest(page=name):
+                if needs_login:
+                    self.client.force_login(self.user)
+                else:
+                    self.client.logout()
+
                 body = self.client.get(reverse(name)).content.decode()
 
-                for marker in ('{#', '#}', '{%', '%}', '{{', '}}'):
-                    self.assertNotIn(
-                        marker, body,
-                        f'{name} leaked the literal {marker} to the browser',
-                    )
+                self.assertNotIn('Bansking', body)
+                self.assertIn('Banking System', body)
 
 
 class NotificationEscapingTests(LocalRatesMixin, TestCase):
