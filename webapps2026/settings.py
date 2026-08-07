@@ -1,7 +1,15 @@
 import os
 from pathlib import Path
 
+from dotenv import load_dotenv
+
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# Load .env if one exists. Real environment variables take precedence, so this
+# is harmless in production. Copy .env.example to .env for local development —
+# it saves prefixing every manage.py command with DJANGO_DEBUG=True, which is
+# shell-specific and a common first stumble on Windows.
+load_dotenv(BASE_DIR / '.env')
 
 
 def _env_flag(name, default):
@@ -18,8 +26,9 @@ if not SECRET_KEY:
     if not DEBUG:
         raise RuntimeError(
             'DJANGO_SECRET_KEY must be set when DEBUG is off.\n'
-            'For local work, run the command with DJANGO_DEBUG=True.\n'
-            'Otherwise generate a key with:\n'
+            'For local development, copy .env.example to .env — that sets '
+            'DJANGO_DEBUG=True for you.\n'
+            'For a real deployment, generate a key with:\n'
             '  python -c "from django.core.management.utils import get_random_secret_key; '
             'print(get_random_secret_key())"'
         )
