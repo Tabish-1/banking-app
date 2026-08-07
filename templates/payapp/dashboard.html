@@ -31,7 +31,7 @@
         <div class="col-lg-8">
             <div class="row h-100 g-3">
                 <div class="col-6 col-md-3">
-                    <a href="/webapps2026/send/" class="action-btn btn-send">
+                    <a href="{% url 'send_payment' %}" class="action-btn btn-send">
                         <div class="dashboard-card action-card">
                             <div class="icon-wrapper"><i class="bi bi-send"></i></div>
                             <span class="action-label text-dark small fw-semibold">Send</span>
@@ -39,7 +39,7 @@
                     </a>
                 </div>
                 <div class="col-6 col-md-3">
-                    <a href="/webapps2026/request/" class="action-btn btn-request">
+                    <a href="{% url 'request_payment' %}" class="action-btn btn-request">
                         <div class="dashboard-card action-card">
                             <div class="icon-wrapper text-success"><i class="bi bi-box-arrow-in-down"></i></div>
                             <span class="action-label text-dark small fw-semibold">Request</span>
@@ -47,7 +47,7 @@
                     </a>
                 </div>
                 <div class="col-6 col-md-3">
-                    <a href="/webapps2026/transactions/" class="action-btn btn-history">
+                    <a href="{% url 'transactions' %}" class="action-btn btn-history">
                         <div class="dashboard-card action-card">
                             <div class="icon-wrapper text-warning"><i class="bi bi-journal-text"></i></div>
                             <span class="action-label text-dark small fw-semibold">History</span>
@@ -55,7 +55,7 @@
                     </a>
                 </div>
                 <div class="col-6 col-md-3">
-                    <a href="/webapps2026/notifications/" class="action-btn btn-alerts position-relative">
+                    <a href="{% url 'notifications' %}" class="action-btn btn-alerts position-relative">
                         <div class="dashboard-card action-card">
                             <div class="icon-wrapper text-danger"><i class="bi bi-bell"></i></div>
                             <span class="action-label text-dark small fw-semibold">Alerts</span>
@@ -74,7 +74,7 @@
     <div class="mt-5">
         <div class="d-flex justify-content-between align-items-center mb-3">
             <h5 class="fw-bold mb-0">Recent Activity</h5>
-            <a href="/webapps2026/transactions/" class="text-decoration-none small fw-bold">View All</a>
+            <a href="{% url 'transactions' %}" class="text-decoration-none small fw-bold">View All</a>
         </div>
         <div class="dashboard-card table-card">
             <div class="table-responsive">

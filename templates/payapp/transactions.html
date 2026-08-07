@@ -126,7 +126,7 @@
                             <td class="text-muted small">{{ r.timestamp|date:"d M Y, H:i" }}</td>
                             <td>
                                 {% if r.status == 'PENDING' %}
-                                <form method="post" action="/webapps2026/handle-request/{{ r.pk }}/" class="d-inline">
+                                <form method="post" action="{% url 'handle_request' r.pk %}" class="d-inline">
                                     {% csrf_token %}
                                     <button name="action" value="accept" class="btn-action btn-accept"><i class="bi bi-check-lg me-1"></i>Accept</button>
                                     <button name="action" value="reject" class="btn-action btn-reject"><i class="bi bi-x-lg me-1"></i>Reject</button>

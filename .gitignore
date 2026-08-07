@@ -25,6 +25,9 @@ certs/
 *.pem
 *.key
 *.crt
+.env
+.env.*
+!.env.example
 
 # IDE / OS
 .DS_Store
