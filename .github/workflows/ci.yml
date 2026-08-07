@@ -1,0 +1,122 @@
+name: CI
+
+on:
+  push:
+    branches: [master]
+  pull_request:
+    branches: [master]
+  workflow_dispatch:
+
+jobs:
+  test:
+    name: Tests (Python ${{ matrix.python-version }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        # Django 4.2 supports 3.10 through 3.12.
+        python-version: ['3.10', '3.11', '3.12']
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Configure environment
+        # Deliberately the same step the README tells a newcomer to run, so a
+        # broken .env.example fails the build rather than the reader.
+        run: cp .env.example .env
+
+      - name: Apply migrations
+        run: python manage.py migrate
+
+      - name: Run tests
+        run: python manage.py test --verbosity 2
+
+  setup-path:
+    name: README setup path works on a clean machine
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Follow the README exactly
+        run: |
+          python3 -m venv venv
+          source venv/bin/activate
+          pip install -r requirements.txt
+          cp .env.example .env
+          python manage.py migrate
+
+      - name: Start the documented HTTPS entrypoint
+        # Also proves run_https.sh generates its own certificate and picks up
+        # the project virtualenv without being activated.
+        run: |
+          ./run_https.sh > server.log 2>&1 &
+          for _ in $(seq 1 30); do
+            curl -sk -o /dev/null https://localhost:8000/webapps2026/login/ && break
+            sleep 2
+          done
+
+      - name: Verify it serves over HTTPS
+        run: |
+          fail() { echo "::error::$1"; cat server.log; exit 1; }
+
+          test -f certs/cert.pem || fail "run_https.sh did not generate a certificate"
+
+          code=$(curl -sk -o /dev/null -w "%{http_code}" https://localhost:8000/webapps2026/login/)
+          [ "$code" = "200" ] || fail "login page returned $code, expected 200"
+
+          body=$(curl -sk https://localhost:8000/webapps2026/conversion/GBP/USD/100/)
+          echo "conversion service returned: $body"
+          case "$body" in
+            *'"converted_amount": "127.00"'*) ;;
+            *) fail "unexpected conversion response" ;;
+          esac
+
+          echo "HTTPS entrypoint verified"
+
+  deploy-check:
+    name: Django deployment checks
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      - name: Run check --deploy with DEBUG off
+        # No .env here: this asserts the production-safe defaults hold, and
+        # that a missing secret key is a hard failure rather than a warning.
+        env:
+          DJANGO_DEBUG: 'False'
+          DJANGO_ALLOWED_HOSTS: example.com
+        run: |
+          export DJANGO_SECRET_KEY="$(python -c 'from django.core.management.utils import get_random_secret_key as k; print(k())')"
+          python manage.py check --deploy --fail-level WARNING
+
+      - name: A missing secret key must fail the build
+        env:
+          DJANGO_DEBUG: 'False'
+        run: |
+          if python manage.py check 2>/dev/null; then
+            echo "::error::settings accepted a missing DJANGO_SECRET_KEY with DEBUG off"
+            exit 1
+          fi
+          echo "Confirmed: missing DJANGO_SECRET_KEY is rejected when DEBUG is off"

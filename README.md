@@ -1,5 +1,10 @@
 # WebApps 2026
 
+[![CI](https://github.com/Tabish-1/banking-app/actions/workflows/ci.yml/badge.svg)](https://github.com/Tabish-1/banking-app/actions/workflows/ci.yml)
+[![Python 3.10+](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)](https://www.python.org/)
+[![Django 4.2](https://img.shields.io/badge/django-4.2-092E20)](https://www.djangoproject.com/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
+
 A peer-to-peer payment web application built with Django. Users can send and request money from each other with automatic currency conversion between GBP, USD, and EUR.
 
 ## Features
@@ -118,6 +123,18 @@ python manage.py test
 ```
 
 65 tests covering the conversion rate table and endpoint, the transfer and payment-request flows (insufficient funds, double-settlement, cross-currency), notification ownership, output escaping, CSRF-protected sign-out, and admin access control. They never touch the network — the conversion client is stubbed onto its local fallback.
+
+### Continuous integration
+
+Every push runs three jobs on GitHub Actions:
+
+| Job | What it proves |
+|---|---|
+| **Tests** | The suite passes on Python 3.10, 3.11 and 3.12 |
+| **Setup path** | The README instructions work on a clean machine — venv, `.env.example`, migrations, then `run_https.sh` generating its own certificate and serving over HTTPS |
+| **Deploy checks** | `manage.py check --deploy` is clean with `DEBUG` off, and a missing `DJANGO_SECRET_KEY` is a hard failure rather than a warning |
+
+The setup job deliberately runs the same commands the README gives you, so instructions that drift out of date break the build instead of the reader.
 
 ## Troubleshooting
 
