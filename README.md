@@ -1,21 +1,22 @@
-# WebApps 2026
+# Banking App — Peer-to-Peer Payments
 
 [![CI](https://github.com/Tabish-1/banking-app/actions/workflows/ci.yml/badge.svg)](https://github.com/Tabish-1/banking-app/actions/workflows/ci.yml)
 [![Python 3.10+](https://img.shields.io/badge/python-3.10%20%7C%203.11%20%7C%203.12-blue)](https://www.python.org/)
 [![Django 4.2](https://img.shields.io/badge/django-4.2-092E20)](https://www.djangoproject.com/)
 [![License: MIT](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
-A peer-to-peer payment web application built with Django. Users can send and request money from each other with automatic currency conversion between GBP, USD, and EUR.
+A Django web application for sending and requesting money between users, with automatic currency conversion across GBP, USD and EUR handled by an internal REST service.
+
+Balances move under database row locks, money is `Decimal` end to end, and configuration is production-safe by default. 65 tests cover the transfer and settlement paths, including the ones that are supposed to fail.
 
 ## Features
 
-- User registration and authentication
-- Send payments to other users by email address
-- Request payments from other users
-- Accept or reject incoming payment requests
-- Currency conversion via an internal REST service
-- Notification system for all payment activity
-- Admin dashboard for managing users and viewing all transactions
+- Registration and authentication, with Django's password validators enforced
+- Send money to any user by email address, converted into their currency
+- Request money from another user; they accept or reject
+- Currency conversion through an internal REST endpoint, with a logged fallback
+- Notifications for every payment event
+- Admin dashboard covering all users, balances and transactions
 
 ## Tech Stack
 
@@ -23,21 +24,25 @@ A peer-to-peer payment web application built with Django. Users can send and req
 - SQLite (development database)
 - Bootstrap 5 via django-crispy-forms
 - HTTPS via django-extensions / Werkzeug + self-signed certificate
+- GitHub Actions for CI
 
 ## Project Structure
 
 ```
-webapps2026/
+banking-app/
 ├── conversionservice/   # Internal REST API for currency conversion
 │   ├── rates.py         #   the rate table — single source of truth
 │   ├── client.py        #   how the rest of the project consumes the service
 │   └── views.py         #   the HTTP endpoint
 ├── payapp/              # Core payment logic, transactions, notifications
-├── register/            # User registration and profile management
+├── register/            # Registration, profiles, create_admin command
 ├── templates/           # HTML templates
 ├── static/              # CSS and static assets
-└── webapps2026/         # Django project settings and URL config
+├── webapps2026/         # Django project settings and URL config
+└── .github/workflows/   # CI
 ```
+
+The `webapps2026` package name and the `/webapps2026/` URL prefix are kept from the original project brief this was built against.
 
 ## Getting Started
 
@@ -198,6 +203,20 @@ Generate a secret key with:
 ```bash
 python -c "from django.core.management.utils import get_random_secret_key; print(get_random_secret_key())"
 ```
+
+## Design Notes
+
+A few decisions that are easy to get wrong in an application that moves money.
+
+**Money is never a float.** Amounts are `Decimal` from the form field to the database column. The REST endpoint serialises them as JSON strings rather than numbers, so a client decoding the response cannot silently turn an exact decimal into a binary float.
+
+**Rates derive from a single base currency.** A table of individual pairs has to be kept mutually invertible by hand, and usually isn't — quoting GBP→USD at 1.27 and USD→GBP at 0.79 destroys about 1.7% of the amount on every round trip. Rates are now stored against GBP and the reverse direction is computed, so a GBP→USD→GBP round trip returns the original amount exactly. There is a test asserting it.
+
+**The balance check happens inside the lock.** Reading a balance, comparing it to the amount, then writing is a time-of-check/time-of-use race: two concurrent transfers can both pass the check and both commit, overdrawing the account. Both profiles are re-read with `select_for_update()` *inside* the transaction, in a single query so that two transfers touching the same pair of accounts cannot deadlock by acquiring locks in opposite orders.
+
+**Network calls never happen while holding a lock.** Currency conversion is resolved before the transaction opens. Calling out over HTTP with rows locked would hold them for the duration of a network round trip.
+
+**Configuration is production-safe by default.** `DEBUG` is off and `DJANGO_SECRET_KEY` is required unless it is explicitly enabled, so a misconfigured deployment fails at startup rather than quietly serving tracebacks. The development entrypoint opts into debug mode itself.
 
 ## Security Notes
 
